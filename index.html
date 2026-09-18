@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Workshop Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Workshop Registration Form</h2>
+
+    <input type="text" id="name" placeholder="Enter Name">
+    <input type="text" id="phone" placeholder="Enter Phone Number">
+    <input type="email" id="email" placeholder="Enter Email">
+
+    <select id="workshop">
+        <option value="">Select Workshop</option>
+        <option>Python Basics</option>
+        <option>Web Development</option>
+        <option>AI Introduction</option>
+    </select>
+
+    <button onclick="register()">Register</button>
+
+    <p id="message"></p>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

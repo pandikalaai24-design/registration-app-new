@@ -1,0 +1,220 @@
+import React, { useState, useEffect } from "react";
+
+function App() {
+  const [registrations, setRegistrations] = useState([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    workshop: "",
+  });
+
+  const [darkMode, setDarkMode] = useState(false);
+  const totalSeats = 50;
+
+  useEffect(() => {
+    const data =
+      JSON.parse(localStorage.getItem("registrations")) || [];
+    setRegistrations(data);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "registrations",
+      JSON.stringify(registrations)
+    );
+  }, [registrations]);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const participant = {
+      id: "WRK" + Date.now(),
+      ...formData,
+      attendance: false,
+    };
+
+    setRegistrations([...registrations, participant]);
+
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      workshop: "",
+    });
+  };
+
+  const markAttendance = (id) => {
+    setRegistrations(
+      registrations.map((p) =>
+        p.id === id
+          ? { ...p, attendance: !p.attendance }
+          : p
+      )
+    );
+  };
+
+  const generateCertificate = (name) => {
+    const win = window.open();
+    win.document.write(`
+      <h1>Certificate of Participation</h1>
+      <hr>
+      <h2>${name}</h2>
+      <p>Successfully completed the workshop.</p>
+    `);
+  };
+
+  const exportCSV = () => {
+    let csv = "ID,Name,Email,Phone,Workshop\n";
+
+    registrations.forEach((p) => {
+      csv += `${p.id},${p.name},${p.email},${p.phone},${p.workshop}\n`;
+    });
+
+    const blob = new Blob([csv], {
+      type: "text/csv",
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "participants.csv";
+    link.click();
+  };
+
+  return (
+    <div className={darkMode ? "dark" : ""}>
+      <div style={{ padding: "10px", textAlign: "right" }}>
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+        >
+          🌙 Dark Mode
+        </button>
+      </div>
+
+      <div className="container">
+
+        {/* Registration Form */}
+        <div className="card">
+          <h2>Workshop Registration</h2>
+
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone Number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
+
+            <select
+              name="workshop"
+              value={formData.workshop}
+              onChange={handleChange}
+              required
+            >
+              <option value="">
+                Select Workshop
+              </option>
+              <option>Web Development</option>
+              <option>Artificial Intelligence</option>
+              <option>Data Science</option>
+              <option>Cloud Computing</option>
+            </select>
+
+            <button type="submit">
+              Register
+            </button>
+          </form>
+
+          <h3>Available Seats</h3>
+          <p>
+            {totalSeats - registrations.length}
+          </p>
+        </div>
+
+        {/* Dashboard */}
+        <div className="card">
+          <h2>Admin Dashboard</h2>
+
+          <button onClick={exportCSV}>
+            Export CSV
+          </button>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Workshop</th>
+                <th>Attendance</th>
+                <th>Certificate</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {registrations.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.id}</td>
+                  <td>{p.name}</td>
+                  <td>{p.workshop}</td>
+
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={p.attendance}
+                      onChange={() =>
+                        markAttendance(p.id)
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    <button
+                      onClick={() =>
+                        generateCertificate(
+                          p.name
+                        )
+                      }
+                    >
+                      Certificate
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+export default App;
